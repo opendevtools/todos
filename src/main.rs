@@ -50,7 +50,7 @@ impl From<(usize, &str)> for Todo {
 
         Todo {
             line_number: (line_number + 1, column.len() + 1),
-            text: text.1.trim().replace("-->", "").to_string(),
+            text: text.1.trim().replace("-->", ""),
             todo_type,
         }
     }
@@ -63,12 +63,7 @@ impl Display for Todo {
             "{} {} {}",
             self.todo_type,
             self.text,
-            format!(
-                "[{}:{}]",
-                self.line_number.0.to_string(),
-                self.line_number.1.to_string()
-            )
-            .bright_black()
+            format!("[{}:{}]", self.line_number.0, self.line_number.1).bright_black()
         )
     }
 }
