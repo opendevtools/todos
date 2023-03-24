@@ -1,38 +1,46 @@
-name: Release
+name: PR check
 
 on:
   pull_request:
     branches:
       - main
 
-env:
-  CARGO_TERM_COLOR: always
+# Cancel previously running workflows
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.9.1
-
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Setup Rust (nightly)
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@nightly
+        id: rust-toolchain
         with:
-          profile: minimal
-          toolchain: nightly
           components: rustfmt, clippy
-          override: true
 
-      - name: Run linting
-        run: cargo clippy --all-targets --all-features -- -D warnings
-
-      - name: Run formatting
-        run: cargo fmt --all -- --check
+      - name: Cache cargo
+        uses: actions/cache@v3
+        id: cache-cargo
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ steps.rust-toolchain.outputs.cachekey }}-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Run tests
         run: cargo test --locked
 
+      - name: Run linting
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
