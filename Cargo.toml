@@ -7,5 +7,6 @@ edition = "2021"
 
 [dependencies]
 colored = "2.0.0"
+dialoguer = { version = "0.10.3", features = ["fuzzy-select"] }
 jwalk = "0.8.1"
 nom = "7.1.3"

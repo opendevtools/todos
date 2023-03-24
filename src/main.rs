@@ -1,6 +1,7 @@
 mod models;
 
 use colored::Colorize;
+use dialoguer::{theme::ColorfulTheme, Input};
 use jwalk::WalkDir;
 use models::{todo::Todo, todo_type::contains_todo_type};
 use std::fs;
@@ -14,6 +15,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("Usage: todo <path> [filter]");
         return Ok(());
     }
+
+    let is_open_cmd = needle == Some("--open".to_string());
 
     let mut files_scanned = 0;
     let mut ok_files = 0;
@@ -49,7 +52,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Check and parse todos
         for line in file_contents.lines().enumerate() {
             if contains_todo_type(line.1).is_ok() {
-                if needle.is_some() && !line.1.contains(needle.as_ref().unwrap()) {
+                if !is_open_cmd && needle.is_some() && !line.1.contains(needle.as_ref().unwrap()) {
                     filtered_files += 1;
                     continue;
                 }
@@ -62,7 +65,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // Print the results
-    todos.iter().for_each(|todo| println!("{todo}"));
+    todos.iter().enumerate().for_each(|(index, todo)| {
+        if is_open_cmd {
+            println!("{index} {todo}");
+        } else {
+            println!("{todo}");
+        }
+    });
 
     println!(
         "\n{} {}\n{} {} scanned {} {} OK {} {} filtered",
@@ -75,6 +84,48 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "/".bright_black(),
         filtered_files.to_string().red(),
     );
+
+    // Add ability to open the selected file using --open
+    if is_open_cmd {
+        let selection: usize = Input::with_theme(&ColorfulTheme::default())
+            .with_prompt("Open file #")
+            .interact()
+            .unwrap();
+
+        let todo = &todos[selection];
+
+        // Open the selected file using the EDITOR environment variable
+        let editor = std::env::var("EDITOR").unwrap_or_else(|_| "vim".to_string());
+
+        match editor.as_str() {
+            "vim" | "nvim" => {
+                std::process::Command::new(&editor)
+                    .arg(todo.file_path.clone())
+                    .arg(format!(
+                        "+call cursor({line}, {column})",
+                        line = todo.line_number.0,
+                        column = todo.line_number.1
+                    ))
+                    .status()
+                    .unwrap();
+            }
+            "code" => {
+                let go_to_line = format!(
+                    "./{file}:{line}:{column}",
+                    file = todo.file_path,
+                    line = todo.line_number.0,
+                    column = todo.line_number.1
+                );
+
+                std::process::Command::new(&editor)
+                    .arg("--goto")
+                    .arg(go_to_line)
+                    .status()
+                    .unwrap();
+            }
+            editor => todo!("Unsupported editor: {editor}"),
+        }
+    }
 
     Ok(())
 }

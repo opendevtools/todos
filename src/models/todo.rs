@@ -8,8 +8,8 @@ use nom::{
 use std::fmt::Display;
 
 pub struct Todo {
-    file_path: String,
-    line_number: (usize, usize),
+    pub file_path: String,
+    pub line_number: (usize, usize),
     text: String,
     todo_type: TodoType,
 }
