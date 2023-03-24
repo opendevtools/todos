@@ -1,92 +1,9 @@
+mod models;
+
 use colored::*;
 use jwalk::WalkDir;
-use std::{collections::HashMap, fmt::Display, fs};
-
-#[derive(PartialEq, Debug)]
-enum TodoType {
-    Todo,
-    Fix,
-    Warning,
-    Note,
-}
-
-impl Display for TodoType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            TodoType::Todo => write!(f, "{}", " TODO ".on_bright_blue().black()),
-            TodoType::Fix => write!(f, "{}", " FIX ".on_bright_red().black()),
-            TodoType::Warning => write!(f, "{}", " WARNING ".on_bright_yellow().black()),
-            TodoType::Note => write!(f, "{}", " NOTE ".on_bright_green().black()),
-        }
-    }
-}
-
-#[derive(Debug)]
-struct Todo {
-    line_number: (usize, usize),
-    text: String,
-    todo_type: TodoType,
-}
-
-impl From<(usize, &str)> for Todo {
-    fn from((line_number, text): (usize, &str)) -> Self {
-        let text = text.split_once(':').unwrap();
-
-        let (column, todo_type) = match text.0 {
-            text if text.contains("// ") => text.split_once("// ").unwrap(),
-            text if text.contains("<!-- ") => text.split_once("<!-- ").unwrap(),
-            text if text.contains("//") => text.split_once("//").unwrap(),
-            text if text.contains("<!--") => text.split_once("<!--").unwrap(),
-            _ => todo!("Unknown TODO format"),
-        };
-
-        let todo_type = match todo_type {
-            "TODO" => TodoType::Todo,
-            "FIX" => TodoType::Fix,
-            "WARNING" => TodoType::Warning,
-            "NOTE" => TodoType::Note,
-            tt => todo!("Unknown TODO type {tt}"),
-        };
-
-        Todo {
-            line_number: (line_number + 1, column.len() + 1),
-            text: text.1.trim().replace("-->", ""),
-            todo_type,
-        }
-    }
-}
-
-impl Display for Todo {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{} {} {}",
-            self.todo_type,
-            self.text,
-            format!("[{}:{}]", self.line_number.0, self.line_number.1).bright_black()
-        )
-    }
-}
-
-fn contains_todo_type(text: &str) -> bool {
-    let valid_todo_types = vec!["TODO", "FIX", "WARNING", "NOTE"];
-
-    for todo_type in valid_todo_types {
-        if text.contains(&format!("// {}", todo_type))
-            || text.contains(&format!("<!-- {}", todo_type))
-            || text.contains(&format!("//{}", todo_type))
-            || text.contains(&format!("<!--{}", todo_type))
-        {
-            return true;
-        }
-    }
-
-    false
-}
-
-fn valid_filetypes() -> Vec<&'static str> {
-    vec!["ts", "js", "tsx", "jsx", "vue", "html"]
-}
+use models::{todo::Todo, todo_type::contains_todo_type};
+use std::{collections::HashMap, fs};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let path = std::env::args().nth(1);
@@ -99,6 +16,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let path = path.unwrap();
     let mut ok_files = 0;
     let mut todos: HashMap<String, Vec<Todo>> = HashMap::new();
+    let supported_filetypes = vec!["ts", "js", "tsx", "jsx", "vue", "html"];
 
     for entry in WalkDir::new(&path).sort(true) {
         let entry = entry?;
@@ -109,7 +27,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         // Skip files with unsupported filetypes
-        if !valid_filetypes().contains(&entry.path().extension().unwrap().to_str().unwrap()) {
+        if !supported_filetypes.contains(&entry.path().extension().unwrap().to_str().unwrap()) {
             continue;
         }
 
@@ -152,57 +70,4 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_todo_types() {
-        // Handles JS/TS comments
-        assert!(contains_todo_type("// TODO: This is a todo"));
-        assert!(contains_todo_type("// FIX: This is a fix"));
-        assert!(contains_todo_type("// WARNING: This is a warning"));
-        assert!(contains_todo_type("// NOTE: This is a note"));
-
-        // Handles HTML comments
-        assert!(contains_todo_type("<!-- TODO: This is a todo -->"));
-        assert!(contains_todo_type("<!-- FIX: This is a fix -->"));
-        assert!(contains_todo_type("<!-- WARNING: This is a warning -->"));
-        assert!(contains_todo_type("<!-- NOTE: This is a note -->"));
-    }
-
-    #[test]
-    fn test_todo_types_without_spacing() {
-        // Handles JS/TS comments
-        assert!(contains_todo_type("//TODO: This is a todo"));
-        assert!(contains_todo_type("//FIX: This is a fix"));
-        assert!(contains_todo_type("//WARNING: This is a warning"));
-        assert!(contains_todo_type("//NOTE: This is a note"));
-
-        // Handles HTML comments
-        assert!(contains_todo_type("<!--TODO: This is a todo-->"));
-        assert!(contains_todo_type("<!--FIX: This is a fix-->"));
-        assert!(contains_todo_type("<!--WARNING: This is a warning-->"));
-        assert!(contains_todo_type("<!--NOTE: This is a note-->"));
-    }
-
-    #[test]
-    fn test_todo_from() {
-        let todo = Todo::from((0, "  // TODO: This is a todo"));
-
-        assert_eq!(todo.line_number, (1, 3));
-        assert_eq!(todo.text, "This is a todo");
-        assert_eq!(todo.todo_type, TodoType::Todo);
-    }
-
-    #[test]
-    fn test_todo_from_without_spacing() {
-        let todo = Todo::from((0, "//TODO: This is a todo"));
-
-        assert_eq!(todo.line_number, (1, 1));
-        assert_eq!(todo.text, "This is a todo");
-        assert_eq!(todo.todo_type, TodoType::Todo);
-    }
 }
