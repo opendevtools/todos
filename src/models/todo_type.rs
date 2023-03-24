@@ -1,7 +1,7 @@
 use colored::*;
 use nom::{
     branch,
-    bytes::complete::{tag, take_till1},
+    bytes::complete::{tag, take_till},
     IResult,
 };
 use std::fmt::Display;
@@ -39,7 +39,7 @@ impl Display for TodoType {
 
 pub fn contains_todo_type(input: &str) -> IResult<&str, &str> {
     let (input, _) = nom::character::complete::multispace0(input)?;
-    let (input, _) = take_till1(char::is_alphabetic)(input)?;
+    let (input, _) = take_till(char::is_alphabetic)(input)?;
 
     branch::alt((tag("TODO"), tag("FIX"), tag("WARNING"), tag("NOTE")))(input)
 }

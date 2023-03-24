@@ -1,6 +1,10 @@
 use super::todo_type::{contains_todo_type, TodoType};
 use colored::*;
-use nom::{bytes::complete::take_till1, character::complete, IResult};
+use nom::{
+    bytes::complete::{take_till, take_till1},
+    character::complete,
+    IResult,
+};
 use std::fmt::Display;
 
 pub struct Todo {
@@ -12,6 +16,7 @@ pub struct Todo {
 
 fn parse_todo(input: &str, line_number: usize, file_path: String) -> IResult<&str, Todo> {
     let (input, column) = complete::multispace0(input)?;
+    let (input, comment_tag) = take_till(char::is_whitespace)(input)?;
     let (input, todo_type) = contains_todo_type(input)?;
     let (input, _) = take_till1(char::is_alphabetic)(input)?;
 
@@ -19,7 +24,7 @@ fn parse_todo(input: &str, line_number: usize, file_path: String) -> IResult<&st
         input,
         Todo {
             file_path,
-            line_number: (line_number + 1, column.len() + 1),
+            line_number: (line_number + 1, column.len() + comment_tag.len() + 2),
             text: input.replace("-->", "").trim().to_string(),
             todo_type: todo_type.into(),
         },
