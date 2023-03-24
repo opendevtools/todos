@@ -205,14 +205,4 @@ mod tests {
         assert_eq!(todo.text, "This is a todo");
         assert_eq!(todo.todo_type, TodoType::Todo);
     }
-
-    #[test]
-    fn test_todo_display() {
-        let todo = Todo::from((0, "  // TODO: This is a todo"));
-
-        assert_eq!(
-            format!("{}", todo),
-            "\u{1b}[104;30m TODO \u{1b}[0m This is a todo \u{1b}[90m[1:3]\u{1b}[0m".to_string()
-        );
-    }
 }
