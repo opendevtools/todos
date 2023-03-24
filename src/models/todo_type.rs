@@ -1,4 +1,9 @@
 use colored::*;
+use nom::{
+    branch,
+    bytes::complete::{tag, take_till1},
+    IResult,
+};
 use std::fmt::Display;
 
 #[derive(PartialEq, Debug)]
@@ -32,20 +37,11 @@ impl Display for TodoType {
     }
 }
 
-pub fn contains_todo_type(text: &str) -> bool {
-    let valid_todo_types = vec!["TODO", "FIX", "WARNING", "NOTE"];
+pub fn contains_todo_type(input: &str) -> IResult<&str, &str> {
+    let (input, _) = nom::character::complete::multispace0(input)?;
+    let (input, _) = take_till1(char::is_alphabetic)(input)?;
 
-    for todo_type in valid_todo_types {
-        if text.contains(&format!("// {}", todo_type))
-            || text.contains(&format!("<!-- {}", todo_type))
-            || text.contains(&format!("//{}", todo_type))
-            || text.contains(&format!("<!--{}", todo_type))
-        {
-            return true;
-        }
-    }
-
-    false
+    branch::alt((tag("TODO"), tag("FIX"), tag("WARNING"), tag("NOTE")))(input)
 }
 
 #[cfg(test)]
@@ -55,30 +51,30 @@ mod tests {
     #[test]
     fn test_todo_types() {
         // Handles JS/TS comments
-        assert!(contains_todo_type("// TODO: This is a todo"));
-        assert!(contains_todo_type("// FIX: This is a fix"));
-        assert!(contains_todo_type("// WARNING: This is a warning"));
-        assert!(contains_todo_type("// NOTE: This is a note"));
+        assert!(contains_todo_type("// TODO: This is a todo").is_ok());
+        assert!(contains_todo_type("// FIX: This is a fix").is_ok());
+        assert!(contains_todo_type("// WARNING: This is a warning").is_ok());
+        assert!(contains_todo_type("// NOTE: This is a note").is_ok());
 
         // Handles HTML comments
-        assert!(contains_todo_type("<!-- TODO: This is a todo -->"));
-        assert!(contains_todo_type("<!-- FIX: This is a fix -->"));
-        assert!(contains_todo_type("<!-- WARNING: This is a warning -->"));
-        assert!(contains_todo_type("<!-- NOTE: This is a note -->"));
+        assert!(contains_todo_type("<!-- TODO: This is a todo -->").is_ok());
+        assert!(contains_todo_type("<!-- FIX: This is a fix -->").is_ok());
+        assert!(contains_todo_type("<!-- WARNING: This is a warning -->").is_ok());
+        assert!(contains_todo_type("<!-- NOTE: This is a note -->").is_ok());
     }
 
     #[test]
     fn test_todo_types_without_spacing() {
         // Handles JS/TS comments
-        assert!(contains_todo_type("//TODO: This is a todo"));
-        assert!(contains_todo_type("//FIX: This is a fix"));
-        assert!(contains_todo_type("//WARNING: This is a warning"));
-        assert!(contains_todo_type("//NOTE: This is a note"));
+        assert!(contains_todo_type("//TODO: This is a todo").is_ok());
+        assert!(contains_todo_type("//FIX: This is a fix").is_ok());
+        assert!(contains_todo_type("//WARNING: This is a warning").is_ok());
+        assert!(contains_todo_type("//NOTE: This is a note").is_ok());
 
         // Handles HTML comments
-        assert!(contains_todo_type("<!--TODO: This is a todo-->"));
-        assert!(contains_todo_type("<!--FIX: This is a fix-->"));
-        assert!(contains_todo_type("<!--WARNING: This is a warning-->"));
-        assert!(contains_todo_type("<!--NOTE: This is a note-->"));
+        assert!(contains_todo_type("<!--TODO: This is a todo-->").is_ok());
+        assert!(contains_todo_type("<!--FIX: This is a fix-->").is_ok());
+        assert!(contains_todo_type("<!--WARNING: This is a warning-->").is_ok());
+        assert!(contains_todo_type("<!--NOTE: This is a note-->").is_ok());
     }
 }
