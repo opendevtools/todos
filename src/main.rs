@@ -10,8 +10,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let needle = std::env::args().nth(2);
 
     // Display help if no path is provided
-    if path.is_none() {
-        println!("Usage: todo <path>");
+    if path.is_none() || path == Some("--help".to_string()) {
+        println!("Usage: todo <path> [filter]");
         return Ok(());
     }
 
