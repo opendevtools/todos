@@ -35,13 +35,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let file_contents = fs::read_to_string(entry.path())?;
 
         // Skip files without TODOs
-        if !contains_todo_type(&file_contents) {
+        if contains_todo_type(&file_contents).is_err() {
             ok_files += 1;
             continue;
         }
 
         for line in file_contents.lines().enumerate() {
-            if contains_todo_type(line.1) {
+            if contains_todo_type(line.1).is_ok() {
                 todos
                     .entry(entry.path().display().to_string())
                     .or_default()
