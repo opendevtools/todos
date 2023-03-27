@@ -227,5 +227,5 @@ jobs:
         with:
           directory: ./homebrew-todos
           github_token: ${{ secrets.TODOS_HOMEBREW_PAT }}
-          branch: master
+          branch: main
           repository: opendevtools/homebrew-todos
