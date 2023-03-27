@@ -189,3 +189,43 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  homebrew:
+    name: Publish on Homebrew
+    runs-on: ubuntu-latest
+    if: needs.next-version.outputs.new_release_published == 'true'
+    needs: [next-version, build, release]
+    env:
+      SHA: ${{ needs.build.outputs.sha }}
+      VERSION: ${{ needs.next-version.outputs.new_release_version }}
+    steps:
+      - name: Checkout Homebrew formula
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          repository: opendevtools/homebrew-todos
+          path: homebrew-todos
+
+      - name: Create template file
+        uses: "finnp/create-file-action@master"
+        env:
+          FILE_NAME: "homebrew-todos/template.rb"
+          FILE_BASE64: "Y2xhc3MgVG9kb3MgPCBGb3JtdWxhCiAgdmVyc2lvbiAie3t2ZXJzaW9ufX0iCiAgZGVzYyAiQSBDTEkgdG9vbCB0byBmaW5kIFRPRE9zIGluIHlvdXIgY29kZS4iCiAgaG9tZXBhZ2UgImh0dHBzOi8vZ2l0aHViLmNvbS9vcGVuZGV2dG9vbHMvdG9kb3MiCiAgdXJsICJodHRwczovL2dpdGh1Yi5jb20vb3BlbmRldnRvb2xzL3RvZG9zL3JlbGVhc2VzL2Rvd25sb2FkL3Yje3ZlcnNpb259L3RvZG9zLSN7dmVyc2lvbn0tYWFyY2g2NC1hcHBsZS1kYXJ3aW4udGFyLmd6IgogIHNoYTI1NiAie3tzaGF9fSIKCiAgZGVmIGluc3RhbGwKICAgIGJpbi5pbnN0YWxsICJ0b2RvcyIKICBlbmQKZW5k"
+
+      - name: Update Homebrew formula
+        working-directory: ./homebrew-todos
+        run: |
+          git config --local user.name github-actions
+          git config --local user.email github-actions@github.com
+          cat template.rb | sed -e 's/{{version}}/'"$VERSION"'/g' -e 's/{{sha}}/'"$SHA"'/g' > Formula/todos.rb
+          rm template.rb
+          git commit -am "feat(release): $VERSION"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          directory: ./homebrew-todos
+          github_token: ${{ secrets.TODOS_HOMEBREW_PAT }}
+          branch: master
+          repository: opendevtools/homebrew-todos
