@@ -1,3 +1,17 @@
+# [1.2.0](https://github.com/opendevtools/todos/compare/v1.1.0...v1.2.0) (2023-03-27)
+
+
+### Bug Fixes
+
+* set column number to start of todo tag ([cb2faff](https://github.com/opendevtools/todos/commit/cb2faff6cc10eeec4afd6a6c1db314cbbb06c61e))
+* set correct line number ([dc290ff](https://github.com/opendevtools/todos/commit/dc290ff75d79dcee4e277aa43c2f31e8bb8145f5))
+
+
+### Features
+
+* add help argument ([b7ce23e](https://github.com/opendevtools/todos/commit/b7ce23e3eb21a238d98f25a2275d67e94c85393f))
+* add simple --open command to open in $EDITOR ([8262176](https://github.com/opendevtools/todos/commit/826217694ab13cf887e1cf2aae762bcf4cc13b6e))
+
 # [1.1.0](https://github.com/opendevtools/todos/compare/v1.0.0...v1.1.0) (2023-03-24)
 
 
