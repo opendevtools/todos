@@ -2,6 +2,12 @@
 
 Easily find comments tagged as TODO, FIX, WARNING, or NOTE in your codebase.
 
+## Installation
+
+```
+brew install opendevtools/todos/todos
+```
+
 ## Usage
 
 ```
