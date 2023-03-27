@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/opendevtools/todos/compare/v1.2.0...v1.3.0) (2023-03-27)
+
+
+### Features
+
+* **ci:** add homebrew release ([c00b1e6](https://github.com/opendevtools/todos/commit/c00b1e656fc0f0b97f60342d349f4834cad64027))
+
 # [1.2.0](https://github.com/opendevtools/todos/compare/v1.1.0...v1.2.0) (2023-03-27)
 
 
