@@ -25,10 +25,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let path = path.unwrap();
     let supported_filetypes = vec!["ts", "js", "tsx", "jsx", "vue", "html"];
+    let gitignore = fs::read_to_string(".gitignore")?;
+    let gitignore = gitignore
+        .lines()
+        .map(|line| line.trim())
+        .filter(|line| !line.starts_with("#"))
+        .map(|line| line.to_string())
+        .collect::<Vec<String>>();
 
     for entry in WalkDir::new(&path).sort(true) {
         let entry = entry?;
         files_scanned += 1;
+
+        let is_ignored = gitignore.contains(&entry.path().display().to_string())
+            || gitignore.contains(&entry.parent_path().display().to_string());
+
+        // Skip files in .gitignore
+        if is_ignored {
+            continue;
+        }
 
         // Skip directories
         if entry.file_type().is_dir() {

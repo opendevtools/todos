@@ -1,1 +1,3 @@
 /target
+test/ignored.js
+test/ignored-folder
