@@ -29,7 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let gitignore = gitignore
         .lines()
         .map(|line| line.trim())
-        .filter(|line| !line.starts_with("#"))
+        .filter(|line| !line.starts_with('#'))
         .map(|line| line.to_string())
         .collect::<Vec<String>>();
 
