@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/opendevtools/todos/compare/v1.3.0...v1.4.0) (2023-03-28)
+
+
+### Features
+
+* add filtering of todos in gitignored files ([3bb3d06](https://github.com/opendevtools/todos/commit/3bb3d06f8521a63f86049ff2a8d84ff14f24cef1))
+
 # [1.3.0](https://github.com/opendevtools/todos/compare/v1.2.0...v1.3.0) (2023-03-27)
 
 
