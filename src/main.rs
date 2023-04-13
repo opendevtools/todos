@@ -24,7 +24,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut todos: Vec<Todo> = vec![];
 
     let path = path.unwrap();
-    let supported_filetypes = vec!["ts", "js", "tsx", "jsx", "vue", "html"];
+    let supported_filetypes = vec!["ts", "js", "tsx", "jsx", "vue", "html", "scss"];
     let gitignore = fs::read_to_string(".gitignore")?;
     let gitignore = gitignore
         .lines()
