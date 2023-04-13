@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/opendevtools/todos/compare/v1.4.0...v1.5.0) (2023-04-13)
+
+
+### Features
+
+* add support for scss files ([9090016](https://github.com/opendevtools/todos/commit/9090016b80f8e308c2278cccdedbbb820b66bc16))
+
 # [1.4.0](https://github.com/opendevtools/todos/compare/v1.3.0...v1.4.0) (2023-03-28)
 
 
