@@ -1,3 +1,16 @@
+# [2.0.0](https://github.com/opendevtools/todos/compare/v1.5.0...v2.0.0) (2023-04-19)
+
+
+### Features
+
+* use clap to parse arguments ([07ed5bb](https://github.com/opendevtools/todos/commit/07ed5bb1f6316711fe23b20c1790889dfcd13219))
+
+
+### BREAKING CHANGES
+
+* Updating to clap gives us a nicer API, cleaner
+code, and automatic CLI help.
+
 # [1.5.0](https://github.com/opendevtools/todos/compare/v1.4.0...v1.5.0) (2023-04-13)
 
 
