@@ -1,29 +1,46 @@
 mod models;
 
+use clap::Parser;
 use colored::Colorize;
 use dialoguer::{theme::ColorfulTheme, Input};
 use jwalk::WalkDir;
 use models::{todo::Todo, todo_type::contains_todo_type};
 use std::fs;
 
+#[derive(Parser, Debug)]
+#[clap(version, author = "Rickard Natt och Dag", name = "Todos")]
+enum Cli {
+    /// Find todos in a directory
+    Find {
+        /// Path to the directory to search in (default: src)
+        path: Option<String>,
+
+        /// Open file in editor
+        #[clap(short, long)]
+        open: bool,
+
+        /// Filter todos by a string
+        #[clap(short, long)]
+        filter: Option<String>,
+    },
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let path = std::env::args().nth(1);
-    let needle = std::env::args().nth(2);
+    let opt = Cli::parse();
 
-    // Display help if no path is provided
-    if path.is_none() || path == Some("--help".to_string()) {
-        println!("Usage: todo <path> [filter]");
-        return Ok(());
-    }
+    let (path, is_open_cmd, needle) = match opt {
+        Cli::Find { path, open, filter } => {
+            let path = path.unwrap_or_else(|| "src".to_string());
 
-    let is_open_cmd = needle == Some("--open".to_string());
+            (path, open, filter)
+        }
+    };
 
     let mut files_scanned = 0;
     let mut ok_files = 0;
     let mut filtered_files = 0;
     let mut todos: Vec<Todo> = vec![];
 
-    let path = path.unwrap();
     let supported_filetypes = vec!["ts", "js", "tsx", "jsx", "vue", "html", "scss"];
     let gitignore = fs::read_to_string(".gitignore")?;
     let gitignore = gitignore
@@ -67,7 +84,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Check and parse todos
         for line in file_contents.lines().enumerate() {
             if contains_todo_type(line.1).is_ok() {
-                if !is_open_cmd && needle.is_some() && !line.1.contains(needle.as_ref().unwrap()) {
+                if needle.is_some() && !line.1.contains(needle.as_ref().unwrap()) {
                     filtered_files += 1;
                     continue;
                 }
