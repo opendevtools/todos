@@ -11,13 +11,23 @@ brew install opendevtools/todos/todos
 ## Usage
 
 ```
-todos <path> [filter]
+todos find [path]
+```
+
+Path defaults to `src` if none is provided.
+
+## Filter TODOs
+
+If you have a long list of TODOs and want to find something in particular, use the `--filter` flag.
+
+```
+todos find [path] --filter <filter>
 ```
 
 ## Open using $EDITOR variable
 
-This command will display numbers for each TODO. Post the one you want to open in the input and it will open using the `$EDITOR` environment variable. If no variable is set, it will use vim.
+This command will display numbers for each TODO. Post the number you want to open in the input and it will open using the `$EDITOR` environment variable. If no variable is set, it will use vim. This can be used together with the `--filter` flag.
 
 ```
-todos <path> --open
+todos find [path] --open
 ```
