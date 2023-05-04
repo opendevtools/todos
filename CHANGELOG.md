@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/opendevtools/todos/compare/v2.0.0...v2.1.0) (2023-05-04)
+
+
+### Features
+
+* handle directory not found and file errors ([65ae7f4](https://github.com/opendevtools/todos/commit/65ae7f407d0dac1e22b59cbdddb9eb48e84af9ac))
+
 # [2.0.0](https://github.com/opendevtools/todos/compare/v1.5.0...v2.0.0) (2023-04-19)
 
 
