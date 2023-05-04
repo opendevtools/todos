@@ -41,6 +41,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut filtered_files = 0;
     let mut todos: Vec<Todo> = vec![];
 
+    // Check if the path is a directory
+    match fs::metadata(&path) {
+        Err(err) => {
+            let error = match err.kind() {
+                std::io::ErrorKind::NotFound => format!("Directory not found: {path}").into(),
+                error => todo!("Error: {error}"),
+            };
+
+            return Err(error);
+        }
+        Ok(_) => {
+            if !fs::metadata(&path)?.is_dir() {
+                return Err("Path is not a directory".into());
+            }
+        }
+    }
+
     let supported_filetypes = vec!["ts", "js", "tsx", "jsx", "vue", "html", "scss"];
     let gitignore = fs::read_to_string(".gitignore")?;
     let gitignore = gitignore
